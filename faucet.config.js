@@ -11,4 +11,10 @@ module.exports = {
       target: './public/js/app.js',
     },
   ],
+  static: [
+    {
+      source: './node_modules/@fortawesome/fontawesome-free/webfonts',
+      target: './public/webfonts',
+    },
+  ],
 };
