@@ -1,0 +1,35 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+    <form class="mb-5" id="questionForm" action="/umfrage/id/frage" method="POST">
+        <div class="mb-3">
+            <label for="inputQuestion" class="form-label lead">Frage 1</label>
+            <input type="text" class="form-control form-control-lg" id="inputQuestion" aria-describedby="emailHelp">
+            <div id="inputQuestionHelp" class="form-text">Gebe hier deine Frage ein.</div>
+        </div>
+        <div class="mb-3" id="divAnswerA">
+            <label for="inputAnswerA" class="form-label">Antwortmöglichkeit A</label>
+            <input type="text" class="form-control form-control-sm" id="inputAnswerA">
+        </div>
+        <div class="mb-3" id="divAnswerB">
+            <label for="inputAnswerB" class="form-label">Antwortmöglichkeit B</label>
+            <input type="text" class="form-control form-control-sm" id="inputAnswerB">
+        </div>
+
+        <button class="btn btn-outline-danger" id="deleteAnswerButton">-</button>
+        <button class="btn btn-outline-primary" id="addAnswerButton">+</button>
+        <div id="answerHelp" class="form-text mb-5">Antwortmöglichkeiten hinzufügen oder entfernen</div>
+    
+        <div class="btn-group mb-3" role="group" aria-label="Auswahl der bisher erstellten Fragen">
+            <input type="radio" class="btn-check" id="btnradio1" autocomplete="off" checked>
+            <label class="btn btn-outline-secondary" for="btnradio1">Frage 1</label>
+
+            <input type="submit" class="btn-check" id="btnradio2" autocomplete="off">
+            <label class="btn btn-outline-primary" for="btnradio2">+</label>
+        </div>
+    </form>
+    <hr/>
+    <form>
+        <button type="submit" class="btn btn-success">Umfrage erstellen</button>
+    </form>
+{% endblock %}
