@@ -1,31 +1,61 @@
 {% extends "layout.njk" %}
 
 {% block content %}
-    <form class="mb-5" id="questionForm" action="/umfrage/id/frage" method="POST">
+    <form class="mb-5" id="questionForm" action="/poll/{{ poll.code }}/question/{{ selectedQuestion }}" method="POST">
         <div class="mb-3">
-            <label for="inputQuestion" class="form-label lead">Frage 1</label>
-            <input type="text" class="form-control form-control-lg" id="inputQuestion" aria-describedby="emailHelp">
+            <label for="inputQuestion" class="form-label lead me-3">Frage {{ selectedQuestion }}</label>
+            {% if not editQuestion %}
+            <a href="/poll/{{ poll.code }}/question/{{ selectedQuestion }}/edit" class="me-2"><i class="fas fa-pen"></i></a>
+            {% endif %}
+            <a href="/poll/{{ poll.code }}/question/{{ selectedQuestion }}/delete" class="me-2" id="trashQuestion"><i class="fas fa-trash"></i></a>
+            {% if poll.questions is defined %}
+            <input value="{{ poll.questions.get(selectedQuestion).question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
+            {% else %}
+            <input value="" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
+            {% endif %}
             <div id="inputQuestionHelp" class="form-text">Gebe hier deine Frage ein.</div>
         </div>
-        <div class="mb-3" id="divAnswerA">
-            <label for="inputAnswerA" class="form-label">Antwortmöglichkeit A</label>
-            <input type="text" class="form-control form-control-sm" id="inputAnswerA">
-        </div>
-        <div class="mb-3" id="divAnswerB">
-            <label for="inputAnswerB" class="form-label">Antwortmöglichkeit B</label>
-            <input type="text" class="form-control form-control-sm" id="inputAnswerB">
-        </div>
+
+        {% if poll.questions is defined and poll.questions.get(selectedQuestion).answerOptions is defined %}
+            {% for letter,answer in poll.questions.get(selectedQuestion).answerOptions %}
+            <div class="mb-3" id="divAnswer{{ letter }}">
+                <label for="inputAnswer{{ letter }}" class="form-label text-muted">Antwortmöglichkeit {{ letter }}</label>
+                <input value="{{ poll.questions.get(selectedQuestion).answerOptions.get(letter).text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ letter }}">
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="mb-3" id="divAnswerA">
+                <label for="inputAnswerA" class="form-label text-muted">Antwortmöglichkeit A</label>
+                <input type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswerA">
+            </div>
+            <div class="mb-3" id="divAnswerB">
+                <label for="inputAnswerB" class="form-label text-muted">Antwortmöglichkeit B</label>
+                <input type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswerB">
+            </div>
+        {% endif %}
 
         <button class="btn btn-outline-danger" id="deleteAnswerButton">-</button>
         <button class="btn btn-outline-primary" id="addAnswerButton">+</button>
         <div id="answerHelp" class="form-text mb-5">Antwortmöglichkeiten hinzufügen oder entfernen</div>
+
+        {% if editQuestion %}
+            <input type="hidden" name="editQuestion" value="true" id="hiddenEditQuestion">
+            <a href="/poll/{{ poll.code }}/question/{{ selectedQuestion }}" class="btn btn-outline-primary">abbrechen</a>
+            <button type="submit" class="btn btn-primary" id="editQuestionSubmit">speichern</button>
+            <div id="answerHelp" class="form-text mb-2">Wenn du an der Frage oder den Antwortmöglichkeiten Änderungen vorgenommen hast, kannst du sie hier abspeichern.</div>
+            <br/>
+        {% endif %}
     
         <div class="btn-group mb-3" role="group" aria-label="Auswahl der bisher erstellten Fragen">
-            <input type="radio" class="btn-check" id="btnradio1" autocomplete="off" checked>
-            <label class="btn btn-outline-secondary" for="btnradio1">Frage 1</label>
-
-            <input type="submit" class="btn-check" id="btnradio2" autocomplete="off">
-            <label class="btn btn-outline-primary" for="btnradio2">+</label>
+            {% if poll.questions is defined %}
+                {% for question in poll.questions %}
+                    <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/question/{{ loop.index }}">Frage {{ loop.index }}</a>
+                {% endfor %}
+            {% endif %}
+            
+            {% if not editQuestion %}
+            <button type="submit" class="btn btn-outline-primary" id="addQuestionSubmit">Frage hinzufügen</button>
+            {% endif %}
         </div>
     </form>
     <hr/>

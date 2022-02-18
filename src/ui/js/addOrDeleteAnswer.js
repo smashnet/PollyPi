@@ -17,6 +17,7 @@ export function addAnswer(event) {
   answerLabel.appendChild(answerLabelText);
   let answerInput = document.createElement('input');
   answerInput.setAttribute('type', 'text');
+  answerInput.setAttribute('name', `answerOptions`);
   answerInput.setAttribute('id', `inputAnswer${currentAnswerName}`);
   answerInput.classList.add('form-control');
   answerInput.classList.add('form-control-sm');

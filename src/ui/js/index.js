@@ -9,3 +9,9 @@ document.querySelector('#addAnswerButton').addEventListener('click', addAnswer);
 document
   .querySelector('#deleteAnswerButton')
   .addEventListener('click', deleteLastAnswer);
+
+document.querySelector('#trashQuestion').addEventListener('click', (e) => {
+  if (!confirm('Möchtest du diese Frage wirklich löschen?')) {
+    e.preventDefault();
+  }
+});
