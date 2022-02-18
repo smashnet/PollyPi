@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePollDto } from './dto/create-poll.dto';
-import { UpdatePollDto } from './dto/update-poll.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@nestjs/common';
 import { AddQuestionDto } from './dto/add-question.dto';
@@ -73,10 +72,6 @@ export class PollService {
 
   findOne(code: string): Poll {
     return this.polls.get(code);
-  }
-
-  update(code: string, updatePollDto: UpdatePollDto) {
-    return `This action updates a #${code} poll`;
   }
 
   remove(code: string) {

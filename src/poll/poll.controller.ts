@@ -3,20 +3,15 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   Render,
   Logger,
-  Res,
   Redirect,
   Query,
 } from '@nestjs/common';
 import { PollService } from './poll.service';
-import { UpdatePollDto } from './dto/update-poll.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { AddQuestionDto } from './dto/add-question.dto';
-import { ParticipateDto } from './dto/participate.dto';
 
 @Controller('poll')
 export class PollController {

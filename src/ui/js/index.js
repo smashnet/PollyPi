@@ -19,7 +19,7 @@ document.querySelector('#trashQuestion').addEventListener('click', (e) => {
 const openClosePollButton = document.querySelector('#openClosePoll');
 openClosePollButton.addEventListener('click', (e) => {
   e.preventDefault();
-  fetch(openClosePollButton.getAttribute('href')).then((_) => {
+  fetch(openClosePollButton.getAttribute('href')).then(() => {
     location.reload(true);
   });
 });
