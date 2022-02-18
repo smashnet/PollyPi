@@ -25,12 +25,12 @@
                     <p class="card-text">Möchtest du an einer Umfrage teilnehmen? Dann gib unten den Umfragecode ein!</p>
                 </div>
                 <div class="card-footer">
-                    <form class="row g-3">
+                    <form class="row g-3" action="/poll/participate">
                         <div class="col">
-                            <input class="form-control form-control-sm" type="text" placeholder="AaBbCc123"/>
+                            <input class="form-control form-control-sm" name="code" type="text" placeholder="AaBbCc123"/>
                         </div>
                         <div class="col">
-                            <button type="button" class="btn btn-primary float-end">Teilnehmen</button>
+                            <button type="submit" class="btn btn-primary float-end">Teilnehmen</button>
                         </div>
                     </form>
                 </div>

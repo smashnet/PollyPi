@@ -15,3 +15,11 @@ document.querySelector('#trashQuestion').addEventListener('click', (e) => {
     e.preventDefault();
   }
 });
+
+const openClosePollButton = document.querySelector('#openClosePoll');
+openClosePollButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  fetch(openClosePollButton.getAttribute('href')).then((_) => {
+    location.reload(true);
+  });
+});

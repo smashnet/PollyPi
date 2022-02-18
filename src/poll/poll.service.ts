@@ -18,8 +18,7 @@ export class PollService {
       code: getRandomCode(),
       owner: createPollDto.owner,
       participants: [],
-      published: false,
-      finished: false,
+      open: false,
       questions: new Map<string, Question[]>(),
       dateCreated: new Date().toLocaleDateString('de', {
         year: 'numeric',
@@ -37,14 +36,39 @@ export class PollService {
     return poll.code;
   }
 
+  openPoll(code: string): Poll {
+    const poll = this.findOne(code);
+    poll.open = true;
+    return poll;
+  }
+
+  closePoll(code: string): Poll {
+    const poll = this.findOne(code);
+    poll.open = false;
+    return poll;
+  }
+
   addQuestion(code: string, qNo: string, addQuestionDto: AddQuestionDto): Poll {
     const poll = this.findOne(code);
     poll.questions.set(qNo, questionFromDto(addQuestionDto));
     return poll;
   }
 
-  findAll() {
-    return `This action returns all poll`;
+  deleteQuestion(code: string, qNo: string): Poll {
+    // Delete actual question
+    const poll = this.findOne(code);
+    const lastQuestionKey = poll.questions.size;
+    poll.questions.delete(qNo);
+    // Rearrange remaining question indices
+    poll.questions.forEach((v, k) => {
+      if (k > qNo) poll.questions.set(String(parseInt(k) - 1), v);
+    });
+    poll.questions.delete(String(lastQuestionKey));
+    return poll;
+  }
+
+  findAll(): Map<string, Poll> {
+    return this.polls;
   }
 
   findOne(code: string): Poll {

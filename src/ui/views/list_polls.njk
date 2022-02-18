@@ -1,0 +1,37 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Umfragecode</th>
+      <th scope="col"># Fragen</th>
+      <th scope="col"># Teilnehmer</th>
+      <th scope="col">Abgeschlossen</th>
+      <th scope="col">Erstellt am</th>
+      <th scope="col">Aktionen</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for code,poll in polls %}
+    <tr>
+      <th scope="row"><a href="/poll/{{ code }}">{{ code }}</a></th>
+      <td>{{ poll.questions.size }}</td>
+      <td>{{ poll.participants.length }}</td>
+      <td>{{ not poll.open }}</td>
+      <td>{{ poll.dateCreated }}</td>
+      <td>
+        <a class="me-3" href="/poll/{{ code }}"><i class="fas fa-play"></i></a>
+        <a class="me-3" href="/poll/{{ code }}/edit/question/1"><i class="fas fa-pen"></i></a>
+        {% if not poll.open %}
+        <a href="/poll/{{ code }}/edit/open" id="openClosePoll"><i class="fas fa-unlock"></i></a>
+        {% else %}
+        <a href="/poll/{{ code }}/edit/close" id="openClosePoll"><i class="fas fa-lock"></i></a>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+    
+{% endblock %}

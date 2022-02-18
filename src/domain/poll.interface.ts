@@ -5,8 +5,7 @@ export interface Poll {
   code: string;
   owner: User;
   participants: string[];
-  published: boolean;
-  finished: boolean;
+  open: boolean;
   questions: Map<string, Question>;
   dateCreated: string;
 }

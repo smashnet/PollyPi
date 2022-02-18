@@ -8,11 +8,15 @@ import {
   Delete,
   Render,
   Logger,
+  Res,
+  Redirect,
+  Query,
 } from '@nestjs/common';
 import { PollService } from './poll.service';
 import { UpdatePollDto } from './dto/update-poll.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { AddQuestionDto } from './dto/add-question.dto';
+import { ParticipateDto } from './dto/participate.dto';
 
 @Controller('poll')
 export class PollController {
@@ -32,7 +36,7 @@ export class PollController {
     return { poll: { code: newPollCode }, selectedQuestion: 1 };
   }
 
-  @Post(':code/question/:questionNumber')
+  @Post(':code/edit/question/:questionNumber')
   @Render('create_poll')
   addQuestion(
     @Body() addQuestionDto: AddQuestionDto,
@@ -55,37 +59,65 @@ export class PollController {
     }
   }
 
-  @Get(':code/question/:number')
+  @Get(':code/edit/open')
+  @Render('open_poll')
+  openPoll(@Param('code') code: string) {
+    const poll = this.pollService.openPoll(code);
+    return { poll: poll };
+  }
+
+  @Get(':code/edit/close')
+  //@Render('open_poll')
+  closePoll(@Param('code') code: string) {
+    this.pollService.closePoll(code);
+  }
+
+  @Get(':code/edit/question/:number')
   @Render('create_poll')
-  showQuestion(@Param('code') code: string, @Param('number') num: string) {
+  showQuestion(@Param('code') code: string, @Param('number') qNo: string) {
     return {
       poll: this.pollService.findOne(code),
-      selectedQuestion: num,
+      selectedQuestion: qNo,
+      viewMode: true,
     };
   }
 
-  @Get(':code/question/:number/edit')
+  @Get(':code/edit/question/:number/edit')
   @Render('create_poll')
-  editQuestion(@Param('code') code: string, @Param('number') num: string) {
+  editQuestion(@Param('code') code: string, @Param('number') qNo: string) {
     return {
       poll: this.pollService.findOne(code),
-      selectedQuestion: num,
+      selectedQuestion: qNo,
       editQuestion: true,
     };
+  }
+
+  @Get(':code/edit/question/:number/delete')
+  @Render('create_poll')
+  deleteQuestion(@Param('code') code: string, @Param('number') qNo: string) {
+    const poll = this.pollService.deleteQuestion(code, qNo);
+    console.log(poll.questions);
+    return {
+      poll: poll,
+      selectedQuestion: nextSelectedQuestion(qNo),
+      deletedQuestion: qNo,
+      viewMode: true,
+    };
+  }
+
+  @Get('participate')
+  @Redirect('/poll', 302)
+  participate(@Query('code') code: string) {
+    return { url: `/poll/${code}` };
   }
 
   @Get(':code')
   findOne(@Param('code') code: string) {
     return this.pollService.findOne(code);
   }
+}
 
-  @Patch(':code')
-  update(@Param('code') code: string, @Body() updatePollDto: UpdatePollDto) {
-    return this.pollService.update(code, updatePollDto);
-  }
-
-  @Delete(':code')
-  remove(@Param('code') code: string) {
-    return this.pollService.remove(code);
-  }
+function nextSelectedQuestion(deletedQuestion: string): string {
+  if (deletedQuestion === '1') return '1';
+  return String(parseInt(deletedQuestion) - 1);
 }

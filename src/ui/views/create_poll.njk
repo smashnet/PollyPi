@@ -1,15 +1,24 @@
 {% extends "layout.njk" %}
 
 {% block content %}
-    <form class="mb-5" id="questionForm" action="/poll/{{ poll.code }}/question/{{ selectedQuestion }}" method="POST">
+    {% if deletedQuestion %}
+    <div class="alert alert-danger" role="alert">
+        Die Frage wurde gelöscht!
+    </div>
+    {% endif %}
+    <form class="mb-5" id="questionForm" action="/poll/{{ poll.code }}/edit/question/{{ selectedQuestion }}" method="POST">
         <div class="mb-3">
             <label for="inputQuestion" class="form-label lead me-3">Frage {{ selectedQuestion }}</label>
             {% if not editQuestion %}
-            <a href="/poll/{{ poll.code }}/question/{{ selectedQuestion }}/edit" class="me-2"><i class="fas fa-pen"></i></a>
+            <a href="/poll/{{ poll.code }}/edit/question/{{ selectedQuestion }}/edit" class="me-2"><i class="fas fa-pen"></i></a>
             {% endif %}
-            <a href="/poll/{{ poll.code }}/question/{{ selectedQuestion }}/delete" class="me-2" id="trashQuestion"><i class="fas fa-trash"></i></a>
+            <a href="/poll/{{ poll.code }}/edit/question/{{ selectedQuestion }}/delete" class="me-2" id="trashQuestion"><i class="fas fa-trash"></i></a>
             {% if poll.questions is defined %}
+            {% if viewMode %}
+            <input value="{{ poll.questions.get(selectedQuestion).question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion" readonly>
+            {% else %}
             <input value="{{ poll.questions.get(selectedQuestion).question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
+            {% endif %}
             {% else %}
             <input value="" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
             {% endif %}
@@ -20,7 +29,11 @@
             {% for letter,answer in poll.questions.get(selectedQuestion).answerOptions %}
             <div class="mb-3" id="divAnswer{{ letter }}">
                 <label for="inputAnswer{{ letter }}" class="form-label text-muted">Antwortmöglichkeit {{ letter }}</label>
+                {% if viewMode %}
+                <input value="{{ poll.questions.get(selectedQuestion).answerOptions.get(letter).text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ letter }}" readonly>
+                {% else %}
                 <input value="{{ poll.questions.get(selectedQuestion).answerOptions.get(letter).text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ letter }}">
+                {% endif %}
             </div>
             {% endfor %}
         {% else %}
@@ -34,13 +47,15 @@
             </div>
         {% endif %}
 
+        {% if not viewMode %}
         <button class="btn btn-outline-danger" id="deleteAnswerButton">-</button>
         <button class="btn btn-outline-primary" id="addAnswerButton">+</button>
         <div id="answerHelp" class="form-text mb-5">Antwortmöglichkeiten hinzufügen oder entfernen</div>
+        {% endif %}
 
         {% if editQuestion %}
             <input type="hidden" name="editQuestion" value="true" id="hiddenEditQuestion">
-            <a href="/poll/{{ poll.code }}/question/{{ selectedQuestion }}" class="btn btn-outline-primary">abbrechen</a>
+            <a href="/poll/{{ poll.code }}/edit/question/{{ selectedQuestion }}" class="btn btn-outline-primary">abbrechen</a>
             <button type="submit" class="btn btn-primary" id="editQuestionSubmit">speichern</button>
             <div id="answerHelp" class="form-text mb-2">Wenn du an der Frage oder den Antwortmöglichkeiten Änderungen vorgenommen hast, kannst du sie hier abspeichern.</div>
             <br/>
@@ -49,7 +64,7 @@
         <div class="btn-group mb-3" role="group" aria-label="Auswahl der bisher erstellten Fragen">
             {% if poll.questions is defined %}
                 {% for question in poll.questions %}
-                    <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/question/{{ loop.index }}">Frage {{ loop.index }}</a>
+                    <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/edit/question/{{ loop.index }}">Frage {{ loop.index }}</a>
                 {% endfor %}
             {% endif %}
             
@@ -59,7 +74,7 @@
         </div>
     </form>
     <hr/>
-    <form>
-        <button type="submit" class="btn btn-success">Umfrage erstellen</button>
+    <form action="/poll/{{ poll.code }}/edit/open">
+        <button type="submit" class="btn btn-success">Umfrage veröffentlichen</button>
     </form>
 {% endblock %}
