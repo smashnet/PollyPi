@@ -1,0 +1,16 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+<div class="card mx-auto mb-5">
+    <div class="card-body text-center">
+        <h5 class="card-title mb-5">Hallo bei PollyPi!</h5>
+        <form id="loginForm" action="/login" method="POST">
+            <div class="lead mb-3">Du bist zum ersten Mal hier, bitte nenne mir doch deinen Namen:</div>
+            <div class="mb-3">
+                <input type="text" name="name" class="form-control form-control-lg" id="loginNameInput">
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitAnswer">Anmelden</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

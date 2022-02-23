@@ -100,6 +100,8 @@ export class PollController {
     };
   }
 
+  // -------------- Play poll --------------
+
   @Get('participate')
   @Redirect('/poll', 302)
   participate(@Query('code') code: string) {
@@ -107,8 +109,18 @@ export class PollController {
   }
 
   @Get(':code')
-  findOne(@Param('code') code: string) {
-    return this.pollService.findOne(code);
+  @Redirect('/poll/:code/question/1', 302)
+  redirect(@Param('code') code: string) {
+    return { url: `/poll/${code}/question/1` };
+  }
+
+  @Get(':code/question/:qNo')
+  @Render('play_poll')
+  playPollQuestion(@Param('code') code: string, @Param('qNo') qNo: string) {
+    return {
+      poll: this.pollService.findOne(code),
+      selectedQuestion: qNo,
+    };
   }
 }
 

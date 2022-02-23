@@ -6,6 +6,13 @@
         Die Frage wurde gelöscht!
     </div>
     {% endif %}
+    <div class="btn-group mb-3" role="group" aria-label="Auswahl der bisher erstellten Fragen">
+        {% if poll.questions is defined %}
+            {% for question in poll.questions %}
+                <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/edit/question/{{ loop.index }}">Frage {{ loop.index }}</a>
+            {% endfor %}
+        {% endif %}
+    </div>
     <form class="mb-5" id="questionForm" action="/poll/{{ poll.code }}/edit/question/{{ selectedQuestion }}" method="POST">
         <div class="mb-3">
             <label for="inputQuestion" class="form-label lead me-3">Frage {{ selectedQuestion }}</label>
@@ -60,18 +67,14 @@
             <div id="answerHelp" class="form-text mb-2">Wenn du an der Frage oder den Antwortmöglichkeiten Änderungen vorgenommen hast, kannst du sie hier abspeichern.</div>
             <br/>
         {% endif %}
-    
-        <div class="btn-group mb-3" role="group" aria-label="Auswahl der bisher erstellten Fragen">
-            {% if poll.questions is defined %}
-                {% for question in poll.questions %}
-                    <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/edit/question/{{ loop.index }}">Frage {{ loop.index }}</a>
-                {% endfor %}
-            {% endif %}
             
-            {% if not editQuestion %}
-            <button type="submit" class="btn btn-outline-primary" id="addQuestionSubmit">Frage hinzufügen</button>
-            {% endif %}
-        </div>
+        {% if not editQuestion %}
+        {% if viewMode %}
+        <button type="submit" class="btn btn-outline-primary" id="addQuestionSubmit">Frage hinzufügen</button>
+        {% else %}
+        <button type="submit" class="btn btn-outline-primary" id="addQuestionSubmit">Frage speichern</button>
+        {% endif %}
+        {% endif %}
     </form>
     <hr/>
     <form action="/poll/{{ poll.code }}/edit/open">

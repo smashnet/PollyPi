@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as nunjucks from 'nunjucks';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -20,6 +21,7 @@ async function bootstrap() {
   app.useStaticAssets(assets);
   app.setBaseViewsDir(views);
   app.setViewEngine('njk');
+  app.use(cookieParser());
 
   await app.listen(3000);
 }

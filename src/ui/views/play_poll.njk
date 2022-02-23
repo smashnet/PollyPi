@@ -1,0 +1,26 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+<div class="btn-group mb-5" role="group" aria-label="Auswahl der bisher erstellten Fragen">
+    {% if poll.questions is defined %}
+        {% for question in poll.questions %}
+            <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/question/{{ loop.index }}">Frage {{ loop.index }}</a>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<form class="mb-5" id="answerForm" action="/poll/{{ poll.code }}/question/{{ selectedQuestion }}" method="POST">
+    <div class="mb-3">
+        <div class="lead mb-3">{{ poll.questions.get(selectedQuestion).question }}</div>
+        {% for letter,answer in poll.questions.get(selectedQuestion).answerOptions %}
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="flexRadioDefault" id="answerRadio{{ letter }}">
+            <label class="form-check-label" for="answerRadio{{ letter }}">
+                {{ answer.text }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary" id="submitAnswer">Abstimmen</button>
+</form>
+{% endblock %}
