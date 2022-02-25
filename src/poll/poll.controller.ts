@@ -8,38 +8,62 @@ import {
   Logger,
   Redirect,
   Query,
+  UseGuards,
+  HttpStatus,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { PollService } from './poll.service';
-import { v4 as uuidv4 } from 'uuid';
 import { AddQuestionDto } from './dto/add-question.dto';
+import { NoUserGuard } from 'src/util/nouser.guard';
+import { Cookies } from 'src/util/cookie.decorator';
+import { AnswerQuestionDto } from './dto/answer-question.dto';
+import { Question } from 'src/domain/question.interface';
+import { Answer } from 'src/domain/answer.interface';
+import { User } from 'src/domain/user.interface';
+import { letterFromIndex, listContainsUser } from 'src/util/utils';
 
 @Controller('poll')
+@UseGuards(NoUserGuard)
 export class PollController {
   private readonly logger = new Logger(PollController.name);
   constructor(private readonly pollService: PollService) {}
 
   @Post('create')
   @Render('create_poll')
-  create() {
+  create(@Cookies('name') name: string, @Cookies('uuid') uuid: string) {
     const createPollDto = {
       owner: {
-        uuid: uuidv4(),
-        name: 'Nico',
+        name: name,
+        uuid: uuid,
       },
     };
     const newPollCode = this.pollService.create(createPollDto);
-    return { poll: { code: newPollCode }, selectedQuestion: 1 };
+    return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
+      poll: { code: newPollCode },
+      selectedQuestion: 1,
+    };
   }
 
   @Post(':code/edit/question/:questionNumber')
   @Render('create_poll')
   addQuestion(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
     @Body() addQuestionDto: AddQuestionDto,
     @Param('code') code: string,
     @Param('questionNumber') qNo: string,
   ) {
     this.logger.log(`New question arrived: ${JSON.stringify(addQuestionDto)}`);
-    const poll = this.pollService.addQuestion(code, qNo, addQuestionDto);
+    const poll = this.pollService.addQuestion(
+      code,
+      qNo,
+      questionFromDto(addQuestionDto),
+    );
     this.logger.log(
       `Added question to poll ${code}: ${JSON.stringify(
         poll.questions.get(qNo),
@@ -48,7 +72,14 @@ export class PollController {
     console.log(addQuestionDto);
     if (addQuestionDto.editQuestion) {
       console.log(poll);
-      return { poll: poll, selectedQuestion: qNo };
+      return {
+        user: {
+          name: name,
+          uuid: uuid,
+        },
+        poll: poll,
+        selectedQuestion: qNo,
+      };
     } else {
       return { poll: poll, selectedQuestion: String(poll.questions.size + 1) };
     }
@@ -56,9 +87,19 @@ export class PollController {
 
   @Get(':code/edit/open')
   @Render('open_poll')
-  openPoll(@Param('code') code: string) {
+  openPoll(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
+    @Param('code') code: string,
+  ) {
     const poll = this.pollService.openPoll(code);
-    return { poll: poll };
+    return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
+      poll: poll,
+    };
   }
 
   @Get(':code/edit/close')
@@ -69,8 +110,17 @@ export class PollController {
 
   @Get(':code/edit/question/:number')
   @Render('create_poll')
-  showQuestion(@Param('code') code: string, @Param('number') qNo: string) {
+  showQuestion(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
+    @Param('code') code: string,
+    @Param('number') qNo: string,
+  ) {
     return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
       poll: this.pollService.findOne(code),
       selectedQuestion: qNo,
       viewMode: true,
@@ -79,8 +129,17 @@ export class PollController {
 
   @Get(':code/edit/question/:number/edit')
   @Render('create_poll')
-  editQuestion(@Param('code') code: string, @Param('number') qNo: string) {
+  editQuestion(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
+    @Param('code') code: string,
+    @Param('number') qNo: string,
+  ) {
     return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
       poll: this.pollService.findOne(code),
       selectedQuestion: qNo,
       editQuestion: true,
@@ -89,10 +148,19 @@ export class PollController {
 
   @Get(':code/edit/question/:number/delete')
   @Render('create_poll')
-  deleteQuestion(@Param('code') code: string, @Param('number') qNo: string) {
+  deleteQuestion(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
+    @Param('code') code: string,
+    @Param('number') qNo: string,
+  ) {
     const poll = this.pollService.deleteQuestion(code, qNo);
     console.log(poll.questions);
     return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
       poll: poll,
       selectedQuestion: nextSelectedQuestion(qNo),
       deletedQuestion: qNo,
@@ -103,28 +171,132 @@ export class PollController {
   // -------------- Play poll --------------
 
   @Get('participate')
-  @Redirect('/poll', 302)
+  @Redirect('/poll', HttpStatus.TEMPORARY_REDIRECT)
   participate(@Query('code') code: string) {
     return { url: `/poll/${code}` };
   }
 
   @Get(':code')
-  @Redirect('/poll/:code/question/1', 302)
+  @Redirect('/poll/:code/question/1', HttpStatus.TEMPORARY_REDIRECT)
   redirect(@Param('code') code: string) {
     return { url: `/poll/${code}/question/1` };
   }
 
   @Get(':code/question/:qNo')
   @Render('play_poll')
-  playPollQuestion(@Param('code') code: string, @Param('qNo') qNo: string) {
+  playPollQuestion(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
+    @Param('code') code: string,
+    @Param('qNo') qNo: string,
+  ) {
+    const poll = this.pollService.findOne(code);
+    const user = userFrom(name, uuid);
+    const userAnswer = getUserAnswer(
+      poll.questions.get(qNo).answerOptions,
+      user,
+    );
     return {
-      poll: this.pollService.findOne(code),
+      user: user,
+      poll: poll,
+      userAnswer: userAnswer,
       selectedQuestion: qNo,
     };
+  }
+
+  @Post(':code/question/:qNo')
+  answerQuestion(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
+    @Body() answerQuestionDto: AnswerQuestionDto,
+    @Param('code') code: string,
+    @Param('qNo') qNo: string,
+    @Res() res: Response,
+  ) {
+    const poll = this.pollService.findOne(code);
+    const qNoNext = nextQuestion(qNo);
+
+    const success = this.pollService.answerQuestion(
+      code,
+      qNo,
+      userFrom(name, uuid),
+      answerFromDto(answerQuestionDto),
+    );
+
+    console.log('answer success:', success);
+
+    if (!success) {
+      // User has already answered this question
+      return res.status(HttpStatus.BAD_REQUEST).render('already_answered', {
+        user: {
+          name: name,
+          uuid: uuid,
+        },
+        poll: poll,
+        selectedQuestion: qNo,
+      });
+    }
+
+    if (parseInt(qNoNext) > poll.questions.size) {
+      // poll finished
+      return res.render('finish_poll', {
+        user: {
+          name: name,
+          uuid: uuid,
+        },
+        poll: poll,
+      });
+    } else {
+      // next question
+      return res.render('answer_stored', {
+        user: {
+          name: name,
+          uuid: uuid,
+        },
+        poll: poll,
+        nextQuestion: qNoNext,
+      });
+    }
   }
 }
 
 function nextSelectedQuestion(deletedQuestion: string): string {
   if (deletedQuestion === '1') return '1';
   return String(parseInt(deletedQuestion) - 1);
+}
+
+function nextQuestion(qNo: string): string {
+  return String(parseInt(qNo) + 1);
+}
+
+function questionFromDto(dto: AddQuestionDto): Question {
+  const answers = new Array<Answer>();
+  dto.answerOptions.forEach((item, i) =>
+    answers.push({ letter: letterFromIndex(i), text: item, answeredBy: [] }),
+  );
+  return {
+    question: dto.question,
+    answerOptions: answers,
+  };
+}
+
+function answerFromDto(dto: AnswerQuestionDto): string {
+  return Object.keys(dto)[0];
+}
+
+function userFrom(name: string, uuid: string): User {
+  return {
+    name: name,
+    uuid: uuid,
+  };
+}
+
+function getUserAnswer(
+  answerOptions: Answer[],
+  user: User,
+): string | undefined {
+  const answer = answerOptions.find((answer) =>
+    listContainsUser(answer.answeredBy, user),
+  );
+  return answer ? answer.letter : undefined;
 }

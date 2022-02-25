@@ -33,13 +33,13 @@
         </div>
 
         {% if poll.questions is defined and poll.questions.get(selectedQuestion).answerOptions is defined %}
-            {% for letter,answer in poll.questions.get(selectedQuestion).answerOptions %}
-            <div class="mb-3" id="divAnswer{{ letter }}">
-                <label for="inputAnswer{{ letter }}" class="form-label text-muted">Antwortmöglichkeit {{ letter }}</label>
+            {% for answer in poll.questions.get(selectedQuestion).answerOptions %}
+            <div class="mb-3" id="divAnswer{{ answer.letter }}">
+                <label for="inputAnswer{{ answer.letter }}" class="form-label text-muted">Antwortmöglichkeit {{ answer.letter }}</label>
                 {% if viewMode %}
-                <input value="{{ poll.questions.get(selectedQuestion).answerOptions.get(letter).text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ letter }}" readonly>
+                <input value="{{ poll.questions.get(selectedQuestion).answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}" readonly>
                 {% else %}
-                <input value="{{ poll.questions.get(selectedQuestion).answerOptions.get(letter).text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ letter }}">
+                <input value="{{ poll.questions.get(selectedQuestion).answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}">
                 {% endif %}
             </div>
             {% endfor %}

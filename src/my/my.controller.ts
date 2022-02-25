@@ -1,5 +1,8 @@
-import { Controller, Get, Logger, Render } from '@nestjs/common';
+import { Controller, Get, Logger, Render, UseGuards } from '@nestjs/common';
+import { userFrom } from 'src/domain/user.interface';
 import { PollService } from 'src/poll/poll.service';
+import { Cookies } from 'src/util/cookie.decorator';
+import { NoUserGuard } from 'src/util/nouser.guard';
 
 @Controller('my')
 export class MyController {
@@ -8,7 +11,12 @@ export class MyController {
 
   @Get()
   @Render('list_polls')
-  listMyPolls() {
-    return { polls: this.pollService.findAll() };
+  @UseGuards(NoUserGuard)
+  listMyPolls(@Cookies('name') name: string, @Cookies('uuid') uuid: string) {
+    const user = userFrom(name, uuid);
+    return {
+      user: user,
+      polls: this.pollService.findByUser(user),
+    };
   }
 }

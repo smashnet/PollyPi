@@ -16,5 +16,9 @@ module.exports = {
       source: './node_modules/@fortawesome/fontawesome-free/webfonts',
       target: './public/webfonts',
     },
+    {
+      source: './assets/icons',
+      target: './public/img',
+    },
   ],
 };

@@ -9,18 +9,35 @@
     {% endif %}
 </div>
 
+{% if userAnswer is defined %}
+<div class="alert alert-info" role="alert">
+    Du hast diese Frage bereits beantwortet.
+</div>
+{% endif %}
+
 <form class="mb-5" id="answerForm" action="/poll/{{ poll.code }}/question/{{ selectedQuestion }}" method="POST">
     <div class="mb-3">
         <div class="lead mb-3">{{ poll.questions.get(selectedQuestion).question }}</div>
-        {% for letter,answer in poll.questions.get(selectedQuestion).answerOptions %}
+        {% for answer in poll.questions.get(selectedQuestion).answerOptions %}
         <div class="form-check">
-            <input class="form-check-input" type="radio" name="flexRadioDefault" id="answerRadio{{ letter }}">
-            <label class="form-check-label" for="answerRadio{{ letter }}">
-                {{ answer.text }}
+            {% if userAnswer is defined%}
+            {% if answer.letter === userAnswer %}
+            <input class="form-check-input" type="radio" name="{{ answer.letter }}" id="answerRadio{{ answer.letter }}" disabled checked>
+            {% else %}
+            <input class="form-check-input" type="radio" name="{{ answer.letter }}" id="answerRadio{{ answer.letter }}" disabled>
+            {% endif %}
+            {% else %}
+            <input class="form-check-input" type="radio" name="{{ answer.letter }}" id="answerRadio{{ answer.letter }}">
+            {% endif %}
+            <label class="form-check-label" for="answerRadio{{ answer.letter }}">
+                <b>{{ answer.letter }}</b>: {{ answer.text }}
             </label>
         </div>
         {% endfor %}
     </div>
+    {% if userAnswer is defined %}
+    {% else %}
     <button type="submit" class="btn btn-primary" id="submitAnswer">Abstimmen</button>
+    {% endif %}
 </form>
 {% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+<div class="btn-group mb-5" role="group" aria-label="Auswahl der bisher erstellten Fragen">
+    {% if poll.questions is defined %}
+        {% for question in poll.questions %}
+            <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/question/{{ loop.index }}">Frage {{ loop.index }}</a>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="alert alert-danger" role="alert">
+  <h4 class="alert-heading">Du hast diese Frage bereits beantwortet!</h4>
+  <p>Bitte wähle oben eine andere Frage zum Beantworten aus, oder kehre zur Hauptseite zurück.</p>
+  <br/>
+  <hr>
+  <p class="mb-0"><a href="/poll/{{ poll.code }}/question/{{ selectedQuestion }}">Zurück zur Frage</a></p>
+</div>
+{% endblock %}

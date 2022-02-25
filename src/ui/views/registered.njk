@@ -1,0 +1,16 @@
+{% extends "layout.njk" %}
+
+{% block head %}
+<meta http-equiv="Refresh" content="5; url='/'" />
+{% endblock %}
+
+{% block content %}
+<div class="alert alert-success" role="alert">
+  <h4 class="alert-heading">Schön, dass du da bist {{ user.name }}!</h4>
+  <p>Jetzt kenne ich dich, und leite dich zur Hauptseite.</p>
+  <br/>
+  <small>Das sollte automatisch passieren, ansonsten klicke den Link hier unten:</p>
+  <hr>
+  <p class="mb-0"><a href="/">Hauptseite</a></p>
+</div>
+{% endblock %}

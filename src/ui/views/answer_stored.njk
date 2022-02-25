@@ -1,0 +1,24 @@
+{% extends "layout.njk" %}
+
+{% block head %}
+<meta http-equiv="Refresh" content="10; url='/poll/{{ poll.code }}/question/{{ nextQuestion }}'" />
+{% endblock %}
+
+{% block content %}
+<div class="btn-group mb-5" role="group" aria-label="Auswahl der bisher erstellten Fragen">
+    {% if poll.questions is defined %}
+        {% for question in poll.questions %}
+            <a class="btn {% if loop.index == selectedQuestion %}btn-secondary{% else %}btn-outline-secondary{% endif %}" id="navButtonQ{{ loop.index }}" href="/poll/{{ poll.code }}/question/{{ loop.index }}">Frage {{ loop.index }}</a>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="alert alert-success" role="alert">
+  <h4 class="alert-heading">Deine Antwort wurde gespeichert!</h4>
+  <p>Du wirst jetzt zur nächsten Frage weitergeleitet.</p>
+  <br/>
+  <small>Das sollte automatisch passieren, ansonsten klicke den Link hier unten:</p>
+  <hr>
+  <p class="mb-0"><a href="/poll/{{ poll.code }}/question/{{ nextQuestion }}">Nächste Frage</a></p>
+</div>
+{% endblock %}

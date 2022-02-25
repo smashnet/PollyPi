@@ -2,37 +2,47 @@ import {
   Body,
   Controller,
   Get,
-  Param,
+  Logger,
   Post,
-  Redirect,
   Render,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AppService } from './app.service';
 import { Cookies } from './util/cookie.decorator';
 import { v4 as uuidv4 } from 'uuid';
 import { AddUserDto } from './add-user.dto';
+import { NoUserGuard } from './util/nouser.guard';
 
 @Controller()
 export class AppController {
+  private readonly logger = new Logger(AppController.name);
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  @Redirect('welcome', 302)
-  checkCookie(@Cookies('name') name: string, @Cookies('uuid') uuid: string) {
-    if (name === undefined || uuid === undefined) {
-      // if cookies are not set, redirect to login view.
-      return { url: '/login' };
-    }
-    console.log('check', name, uuid);
-    return;
+  @Render('index')
+  @UseGuards(NoUserGuard)
+  index(@Cookies('name') name: string, @Cookies('uuid') uuid: string) {
+    return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
+    };
   }
 
   @Get('welcome')
   @Render('index')
+  @UseGuards(NoUserGuard)
   welcome(@Cookies('name') name: string, @Cookies('uuid') uuid: string) {
-    return { username: name };
+    return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
+    };
   }
 
   @Get('login')
@@ -42,14 +52,22 @@ export class AppController {
   }
 
   @Post('login')
-  @Redirect('/', 302)
+  @Render('registered')
   placeCookies(
     @Res({ passthrough: true }) response: Response,
+    @Req() request: Request,
     @Body() addUserDto: AddUserDto,
   ) {
-    console.log('Registering:', addUserDto.name);
-    response.cookie('name', addUserDto.name);
-    response.cookie('uuid', uuidv4());
-    return { url: '/' };
+    const name = addUserDto.name;
+    const uuid = uuidv4();
+    response.cookie('name', name);
+    response.cookie('uuid', uuid);
+    this.logger.log(`New user: ${name} - ${uuid} (${request.ip})`);
+    return {
+      user: {
+        name: name,
+        uuid: uuid,
+      },
+    };
   }
 }

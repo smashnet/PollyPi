@@ -17,19 +17,24 @@
         <div class="container d-flex justify-content-between">
           {% if title is defined %}
           <a href="{{ title.href }}" class="navbar-brand d-flex align-items-center">
-            <img class="logo" src="/noun-parrot-2430918.svg" alt="PollyPi Logo"/>
+            <img class="logo" src="/img/noun-parrot-2430918.svg" alt="PollyPi Logo"/>
             <strong>{{ title.name }}</strong>
           {% else %}
           <a href="/" class="navbar-brand d-flex align-items-center">
-            <img class="logo" src="/noun-parrot-2430918.svg" alt="PollyPi Logo"/>
+            <img class="logo" src="/img/noun-parrot-2430918.svg" alt="PollyPi Logo"/>
             <strong class="ms-2">PollyPi</strong>
           {% endif %}
           </a>
-          {% if poll is defined %}
           <div class="lead">
-            Umfragecode: {{ poll.code }}
-          </div>
+          {% if poll is defined %}
+          Umfragecode: <b>{{ poll.code }}</b>
           {% endif %}
+          </div>
+          <div class="small">
+          {% if user is defined %}
+          Angemeldet als: <b>{{ user.name }}</b>
+          {% endif %}
+          </div>
         </div>
       </div>
     </header>

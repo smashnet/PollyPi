@@ -1,16 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePollDto } from './dto/create-poll.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@nestjs/common';
-import { AddQuestionDto } from './dto/add-question.dto';
 import { Poll } from 'src/domain/poll.interface';
 import { Question } from 'src/domain/question.interface';
-import { Answer } from 'src/domain/answer.interface';
+import { User } from 'src/domain/user.interface';
+import {
+  getRandomCode,
+  indexFromLetter,
+  listContainsUser,
+  usersAreEqual,
+} from 'src/util/utils';
+import { writeFile } from 'fs';
 
 @Injectable()
 export class PollService {
   private readonly logger = new Logger(PollService.name);
-  private polls = new Map();
+  private pollsSaveFile = './polls.json';
+  private polls = new Array<Poll>();
 
   create(createPollDto: CreatePollDto) {
     const poll = {
@@ -18,7 +24,7 @@ export class PollService {
       owner: createPollDto.owner,
       participants: [],
       open: false,
-      questions: new Map<string, Question[]>(),
+      questions: new Map<string, Question>(),
       dateCreated: new Date().toLocaleDateString('de', {
         year: 'numeric',
         month: 'short',
@@ -31,25 +37,29 @@ export class PollService {
     this.logger.log(
       `Created new poll with code: ${poll.code} - ${poll.dateCreated}`,
     );
-    this.polls.set(poll.code, poll);
+    this.polls.push(poll);
+    this.savePolls();
     return poll.code;
   }
 
   openPoll(code: string): Poll {
     const poll = this.findOne(code);
     poll.open = true;
+    this.savePolls();
     return poll;
   }
 
   closePoll(code: string): Poll {
     const poll = this.findOne(code);
     poll.open = false;
+    this.savePolls();
     return poll;
   }
 
-  addQuestion(code: string, qNo: string, addQuestionDto: AddQuestionDto): Poll {
+  addQuestion(code: string, qNo: string, newQuestion: Question): Poll {
     const poll = this.findOne(code);
-    poll.questions.set(qNo, questionFromDto(addQuestionDto));
+    poll.questions.set(qNo, newQuestion);
+    this.savePolls();
     return poll;
   }
 
@@ -63,37 +73,60 @@ export class PollService {
       if (k > qNo) poll.questions.set(String(parseInt(k) - 1), v);
     });
     poll.questions.delete(String(lastQuestionKey));
+    this.savePolls();
     return poll;
   }
 
-  findAll(): Map<string, Poll> {
+  answerQuestion(
+    code: string,
+    qNo: string,
+    user: User,
+    answer: string,
+  ): boolean {
+    const poll = this.findOne(code);
+    savePollParticipant(poll, user);
+    if (
+      listContainsUser(
+        poll.questions.get(qNo).answerOptions[indexFromLetter(answer)]
+          .answeredBy,
+        user,
+      )
+    ) {
+      return false;
+    }
+    poll.questions
+      .get(qNo)
+      .answerOptions[indexFromLetter(answer)].answeredBy.push(user);
+    this.savePolls();
+    return true;
+  }
+
+  findAll(): Poll[] {
     return this.polls;
   }
 
   findOne(code: string): Poll {
-    return this.polls.get(code);
+    return this.polls.find((poll) => poll.code === code);
+  }
+
+  findByUser(user: User): Poll[] {
+    return this.polls.filter((poll) => usersAreEqual(poll.owner, user));
   }
 
   remove(code: string) {
-    return this.polls.delete(code);
+    this.polls = this.polls.filter((poll) => poll.code !== code);
+    this.savePolls();
+  }
+
+  private savePolls() {
+    writeFile(this.pollsSaveFile, JSON.stringify(this.polls), (err) => {
+      if (err) throw err;
+    });
   }
 }
 
-function getRandomCode(): string {
-  return uuidv4().substring(0, 8);
-}
-
-function questionFromDto(dto: AddQuestionDto): Question {
-  const answerMap = new Map<string, Answer>();
-  dto.answerOptions.forEach((item, i) =>
-    answerMap.set(letterFromIndex(i), { text: item }),
-  );
-  return {
-    question: dto.question,
-    answerOptions: answerMap,
-  };
-}
-
-function letterFromIndex(i: number): string {
-  return String.fromCharCode(i + 65);
+function savePollParticipant(poll: Poll, user: User) {
+  if (!listContainsUser(poll.participants, user)) {
+    poll.participants.push(user);
+  }
 }
