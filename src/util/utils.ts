@@ -1,3 +1,4 @@
+import { Question } from 'src/domain/question.interface';
 import { User } from 'src/domain/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,4 +22,24 @@ export function indexFromLetter(l: string): number {
 
 export function usersAreEqual(user1: User, user2: User): boolean {
   return user1.name === user2.name && user1.uuid === user2.uuid;
+}
+
+export function removeFromArray(qNo: string, array: any[]): any[] {
+  const newArray = [];
+  array.forEach((elem, i) => {
+    if (parseInt(qNo) - 1 !== i) {
+      newArray.push(elem);
+    }
+  });
+  return newArray;
+}
+
+export function insertQuestion(array: any[], qNo: string, elem: any): any[] {
+  const newQIndex = parseInt(qNo) - 1;
+  if (newQIndex + 1 > array.length) {
+    array.push(elem);
+  } else {
+    array[newQIndex] = elem;
+  }
+  return array;
 }

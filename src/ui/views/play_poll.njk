@@ -17,8 +17,9 @@
 
 <form class="mb-5" id="answerForm" action="/poll/{{ poll.code }}/question/{{ selectedQuestion }}" method="POST">
     <div class="mb-3">
-        <div class="lead mb-3">{{ poll.questions.get(selectedQuestion).question }}</div>
-        {% for answer in poll.questions.get(selectedQuestion).answerOptions %}
+        <div class="lead mb-3"><b>{{ poll.questions[selectedQuestion-1].question }}</b></div>
+        <hr/>
+        {% for answer in poll.questions[selectedQuestion-1].answerOptions %}
         <div class="form-check">
             {% if userAnswer is defined%}
             {% if answer.letter === userAnswer %}

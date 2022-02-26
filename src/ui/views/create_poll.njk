@@ -22,9 +22,9 @@
             <a href="/poll/{{ poll.code }}/edit/question/{{ selectedQuestion }}/delete" class="me-2" id="trashQuestion"><i class="fas fa-trash"></i></a>
             {% if poll.questions is defined %}
             {% if viewMode %}
-            <input value="{{ poll.questions.get(selectedQuestion).question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion" readonly>
+            <input value="{{ poll.questions[selectedQuestion-1].question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion" readonly>
             {% else %}
-            <input value="{{ poll.questions.get(selectedQuestion).question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
+            <input value="{{ poll.questions[selectedQuestion-1].question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
             {% endif %}
             {% else %}
             <input value="" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
@@ -32,14 +32,14 @@
             <div id="inputQuestionHelp" class="form-text">Gebe hier deine Frage ein.</div>
         </div>
 
-        {% if poll.questions is defined and poll.questions.get(selectedQuestion).answerOptions is defined %}
-            {% for answer in poll.questions.get(selectedQuestion).answerOptions %}
+        {% if poll.questions is defined and poll.questions[selectedQuestion-1].answerOptions is defined %}
+            {% for answer in poll.questions[selectedQuestion-1].answerOptions %}
             <div class="mb-3" id="divAnswer{{ answer.letter }}">
                 <label for="inputAnswer{{ answer.letter }}" class="form-label text-muted">Antwortmöglichkeit {{ answer.letter }}</label>
                 {% if viewMode %}
-                <input value="{{ poll.questions.get(selectedQuestion).answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}" readonly>
+                <input value="{{ poll.questions[selectedQuestion-1].answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}" readonly>
                 {% else %}
-                <input value="{{ poll.questions.get(selectedQuestion).answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}">
+                <input value="{{ poll.questions[selectedQuestion-1].answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}">
                 {% endif %}
             </div>
             {% endfor %}

@@ -7,10 +7,12 @@ import { User } from 'src/domain/user.interface';
 import {
   getRandomCode,
   indexFromLetter,
+  insertQuestion,
   listContainsUser,
+  removeFromArray,
   usersAreEqual,
 } from 'src/util/utils';
-import { writeFile } from 'fs';
+import { writeFile, existsSync, readFileSync } from 'fs';
 
 @Injectable()
 export class PollService {
@@ -18,13 +20,20 @@ export class PollService {
   private pollsSaveFile = './polls.json';
   private polls = new Array<Poll>();
 
+  constructor() {
+    if (existsSync(this.pollsSaveFile)) {
+      const data = readFileSync(this.pollsSaveFile, 'utf8');
+      this.polls = JSON.parse(data);
+    }
+  }
+
   create(createPollDto: CreatePollDto) {
     const poll = {
       code: getRandomCode(),
       owner: createPollDto.owner,
       participants: [],
       open: false,
-      questions: new Map<string, Question>(),
+      questions: new Array<Question>(),
       dateCreated: new Date().toLocaleDateString('de', {
         year: 'numeric',
         month: 'short',
@@ -58,7 +67,7 @@ export class PollService {
 
   addQuestion(code: string, qNo: string, newQuestion: Question): Poll {
     const poll = this.findOne(code);
-    poll.questions.set(qNo, newQuestion);
+    poll.questions = insertQuestion(poll.questions, qNo, newQuestion);
     this.savePolls();
     return poll;
   }
@@ -66,13 +75,7 @@ export class PollService {
   deleteQuestion(code: string, qNo: string): Poll {
     // Delete actual question
     const poll = this.findOne(code);
-    const lastQuestionKey = poll.questions.size;
-    poll.questions.delete(qNo);
-    // Rearrange remaining question indices
-    poll.questions.forEach((v, k) => {
-      if (k > qNo) poll.questions.set(String(parseInt(k) - 1), v);
-    });
-    poll.questions.delete(String(lastQuestionKey));
+    poll.questions = removeFromArray(qNo, poll.questions);
     this.savePolls();
     return poll;
   }
@@ -87,16 +90,16 @@ export class PollService {
     savePollParticipant(poll, user);
     if (
       listContainsUser(
-        poll.questions.get(qNo).answerOptions[indexFromLetter(answer)]
+        poll.questions[parseInt(qNo) - 1].answerOptions[indexFromLetter(answer)]
           .answeredBy,
         user,
       )
     ) {
       return false;
     }
-    poll.questions
-      .get(qNo)
-      .answerOptions[indexFromLetter(answer)].answeredBy.push(user);
+    poll.questions[parseInt(qNo) - 1].answerOptions[
+      indexFromLetter(answer)
+    ].answeredBy.push(user);
     this.savePolls();
     return true;
   }

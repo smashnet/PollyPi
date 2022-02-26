@@ -22,6 +22,7 @@ import { Question } from 'src/domain/question.interface';
 import { Answer } from 'src/domain/answer.interface';
 import { User } from 'src/domain/user.interface';
 import { letterFromIndex, listContainsUser } from 'src/util/utils';
+import { Poll } from 'src/domain/poll.interface';
 
 @Controller('poll')
 @UseGuards(NoUserGuard)
@@ -66,12 +67,10 @@ export class PollController {
     );
     this.logger.log(
       `Added question to poll ${code}: ${JSON.stringify(
-        poll.questions.get(qNo),
+        poll.questions[parseInt(qNo) - 1],
       )}`,
     );
-    console.log(addQuestionDto);
     if (addQuestionDto.editQuestion) {
-      console.log(poll);
       return {
         user: {
           name: name,
@@ -79,9 +78,13 @@ export class PollController {
         },
         poll: poll,
         selectedQuestion: qNo,
+        viewMode: true,
       };
     } else {
-      return { poll: poll, selectedQuestion: String(poll.questions.size + 1) };
+      return {
+        poll: poll,
+        selectedQuestion: String(poll.questions.length + 1),
+      };
     }
   }
 
@@ -155,7 +158,6 @@ export class PollController {
     @Param('number') qNo: string,
   ) {
     const poll = this.pollService.deleteQuestion(code, qNo);
-    console.log(poll.questions);
     return {
       user: {
         name: name,
@@ -193,7 +195,7 @@ export class PollController {
     const poll = this.pollService.findOne(code);
     const user = userFrom(name, uuid);
     const userAnswer = getUserAnswer(
-      poll.questions.get(qNo).answerOptions,
+      poll.questions[parseInt(qNo) - 1].answerOptions,
       user,
     );
     return {
@@ -223,8 +225,6 @@ export class PollController {
       answerFromDto(answerQuestionDto),
     );
 
-    console.log('answer success:', success);
-
     if (!success) {
       // User has already answered this question
       return res.status(HttpStatus.BAD_REQUEST).render('already_answered', {
@@ -237,7 +237,7 @@ export class PollController {
       });
     }
 
-    if (parseInt(qNoNext) > poll.questions.size) {
+    if (parseInt(qNoNext) > poll.questions.length) {
       // poll finished
       return res.render('finish_poll', {
         user: {
@@ -257,6 +257,28 @@ export class PollController {
         nextQuestion: qNoNext,
       });
     }
+  }
+
+  // -------------- Poll Results --------------
+
+  @Get(':code/results/:qNo')
+  @Render('poll_results')
+  showResults(
+    @Cookies('name') name: string,
+    @Cookies('uuid') uuid: string,
+    @Param('code') code: string,
+    @Param('qNo') qNo: string,
+  ) {
+    const poll = this.pollService.findOne(code);
+    const user = userFrom(name, uuid);
+    const results = prepareResults(poll);
+
+    return {
+      user: user,
+      poll: poll,
+      results: results,
+      selectedQuestion: qNo,
+    };
   }
 }
 
@@ -299,4 +321,21 @@ function getUserAnswer(
     listContainsUser(answer.answeredBy, user),
   );
   return answer ? answer.letter : undefined;
+}
+
+function prepareResults(poll: Poll): any {
+  const results = [];
+  poll.questions.forEach((q) => {
+    let qParticipants = 0;
+    const qVotes = [];
+    q.answerOptions.forEach((answer) => {
+      qParticipants += answer.answeredBy.length;
+      qVotes.push(answer.answeredBy.length);
+    });
+    results.push({
+      total: qParticipants,
+      votesPerAnswer: qVotes,
+    });
+  });
+  return results;
 }
