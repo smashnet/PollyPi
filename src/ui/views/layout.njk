@@ -32,7 +32,14 @@
           </div>
           <div class="small">
           {% if user is defined %}
-          Angemeldet als: <b>{{ user.name }}</b>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              {{ user.name }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a class="dropdown-item" href="/my">Meine Umfragen</a></li>
+            </ul>
+          </div>
           {% endif %}
           </div>
         </div>
@@ -46,7 +53,6 @@
     <footer class="container text-muted">
       <div class="row">
         <p class="col">PollyPi &copy; 2022 Nicolas Inden</p>
-        <p class="col text-center"><a href="/my"><i class="fas fa-poll"></i></a></p>
         <p class="col"><a class="float-end" href="https://github.com/smashnet/PollyPi">Visit PollyPi on GitHub</a></p>
       </div>
     </footer>
