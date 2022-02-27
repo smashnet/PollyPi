@@ -149,8 +149,11 @@ function savePollParticipant(poll: Poll, user: User) {
 }
 
 function createQRCode(code: string) {
+  if (!existsSync('./public/qr')) {
+    mkdirSync('./public/qr');
+  }
   QRCode.toFile(
-    `./public/img/${code}.png`,
+    `./public/qr/${code}.png`,
     `${config.base_url}/poll/${code}`,
     (err) => {
       if (err) throw err;

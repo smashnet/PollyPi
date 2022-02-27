@@ -7,10 +7,10 @@ RUN npm install
 
 COPY . .
 
-VOLUME [ "/usr/src/app/public" ]
-VOLUME [ "/usr/src/app/data" ]
-
 RUN npm run build
+
+VOLUME [ "/usr/src/app/public/qr" ]
+VOLUME [ "/usr/src/app/data" ]
 
 EXPOSE 3000
 
