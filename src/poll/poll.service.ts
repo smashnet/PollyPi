@@ -14,6 +14,10 @@ import {
 } from 'src/util/utils';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path = require('path');
+import { config } from 'src/config';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QRCode = require('qrcode');
 
 @Injectable()
 export class PollService {
@@ -60,6 +64,7 @@ export class PollService {
     const poll = this.findOne(code);
     poll.open = true;
     this.savePolls();
+    createQRCode(poll.code);
     return poll;
   }
 
@@ -141,4 +146,14 @@ function savePollParticipant(poll: Poll, user: User) {
   if (!listContainsUser(poll.participants, user)) {
     poll.participants.push(user);
   }
+}
+
+function createQRCode(code: string) {
+  QRCode.toFile(
+    `./public/img/${code}.png`,
+    `${config.base_url}/poll/${code}`,
+    (err) => {
+      if (err) throw err;
+    },
+  );
 }

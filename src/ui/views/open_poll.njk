@@ -5,7 +5,12 @@
   <h4 class="alert-heading">Umfrage veröffentlicht!</h4>
   <p>Super, du hast deine Umfrage erfolgreich veröffentlich!</p>
   <p>Teile den folgenden Link mit den Teilnehmern:</p>
-  <hr>
+  <a href="{{ poll_url }}">{{ poll_url }}</a>
+  <hr/>
   <p class="mb-0"><a href="/poll/{{ poll.code }}">Zur Umfrage</a></p>
+</div>
+
+<div class="text-center">
+  <img class="mb-3" width="30%" src="/img/{{ poll.code }}.png">
 </div>
 {% endblock %}

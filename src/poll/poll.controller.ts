@@ -23,6 +23,7 @@ import { Answer } from 'src/domain/answer.interface';
 import { User } from 'src/domain/user.interface';
 import { letterFromIndex, listContainsUser } from 'src/util/utils';
 import { Poll } from 'src/domain/poll.interface';
+import { config } from 'src/config';
 
 @Controller('poll')
 @UseGuards(NoUserGuard)
@@ -102,6 +103,7 @@ export class PollController {
         uuid: uuid,
       },
       poll: poll,
+      poll_url: `${config.base_url}/poll/${poll.code}`,
     };
   }
 
