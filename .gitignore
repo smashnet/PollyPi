@@ -3,6 +3,9 @@
 /node_modules
 /public
 
+# poll data
+/data
+
 # Logs
 logs
 *.log

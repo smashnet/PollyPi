@@ -12,17 +12,22 @@ import {
   removeFromArray,
   usersAreEqual,
 } from 'src/util/utils';
-import { writeFile, existsSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import path = require('path');
 
 @Injectable()
 export class PollService {
   private readonly logger = new Logger(PollService.name);
-  private pollsSaveFile = './polls.json';
+  private pollsSaveDir = './data';
+  private pollsSaveFile = 'polls.json';
   private polls = new Array<Poll>();
 
   constructor() {
-    if (existsSync(this.pollsSaveFile)) {
-      const data = readFileSync(this.pollsSaveFile, 'utf8');
+    if (existsSync(path.join(this.pollsSaveDir, this.pollsSaveFile))) {
+      const data = readFileSync(
+        path.join(this.pollsSaveDir, this.pollsSaveFile),
+        'utf8',
+      );
       this.polls = JSON.parse(data);
     }
   }
@@ -122,9 +127,13 @@ export class PollService {
   }
 
   private savePolls() {
-    writeFile(this.pollsSaveFile, JSON.stringify(this.polls), (err) => {
-      if (err) throw err;
-    });
+    if (!existsSync(this.pollsSaveDir)) {
+      mkdirSync(path.join(this.pollsSaveDir));
+    }
+    writeFileSync(
+      path.join(this.pollsSaveDir, this.pollsSaveFile),
+      JSON.stringify(this.polls),
+    );
   }
 }
 

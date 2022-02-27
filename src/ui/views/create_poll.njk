@@ -24,7 +24,7 @@
             {% if viewMode %}
             <input value="{{ poll.questions[selectedQuestion-1].question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion" readonly>
             {% else %}
-            <input value="{{ poll.questions[selectedQuestion-1].question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
+            <input value="{{ poll.questions[selectedQuestion-1].question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion" required="required">
             {% endif %}
             {% else %}
             <input value="" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
@@ -39,7 +39,7 @@
                 {% if viewMode %}
                 <input value="{{ poll.questions[selectedQuestion-1].answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}" readonly>
                 {% else %}
-                <input value="{{ poll.questions[selectedQuestion-1].answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}">
+                <input value="{{ poll.questions[selectedQuestion-1].answerOptions[loop.index-1].text }}" type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswer{{ answer.letter }}" required="required">
                 {% endif %}
             </div>
             {% endfor %}
