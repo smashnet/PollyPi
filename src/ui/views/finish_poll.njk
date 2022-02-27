@@ -4,8 +4,8 @@
 <div class="alert alert-success" role="alert">
   <h4 class="alert-heading">Umfrage abgeschlossen!</h4>
   <p>Vielen Dank, du hast die Umfrage erfolgreich abgeschlossen!</p>
-  <small>Zurück zur Hauptseite:</small>
+  <small>Du kannst dir jetzt die (vorläufigen) Ergebnisse anschauen, oder zur Hauptseite zurückkehren:</small>
   <hr>
-  <p class="mb-0"><a href="/">Zur Hauptseite</a></p>
+  <p class="mb-0"><a class="me-3" href="/poll/{{ poll.code }}/results/1">Ergebnisse</a><a href="/">Zur Hauptseite</a></p>
 </div>
 {% endblock %}
