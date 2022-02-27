@@ -27,7 +27,7 @@
             <input value="{{ poll.questions[selectedQuestion-1].question }}" type="text" name="question" class="form-control form-control-lg" id="inputQuestion" required="required">
             {% endif %}
             {% else %}
-            <input value="" type="text" name="question" class="form-control form-control-lg" id="inputQuestion">
+            <input value="" type="text" name="question" class="form-control form-control-lg" id="inputQuestion" required="required">
             {% endif %}
             <div id="inputQuestionHelp" class="form-text">Gebe hier deine Frage ein.</div>
         </div>
@@ -46,11 +46,11 @@
         {% else %}
             <div class="mb-3" id="divAnswerA">
                 <label for="inputAnswerA" class="form-label text-muted">Antwortmöglichkeit A</label>
-                <input type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswerA">
+                <input type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswerA" required="required">
             </div>
             <div class="mb-3" id="divAnswerB">
                 <label for="inputAnswerB" class="form-label text-muted">Antwortmöglichkeit B</label>
-                <input type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswerB">
+                <input type="text" name="answerOptions" class="form-control form-control-sm" id="inputAnswerB" required="required">
             </div>
         {% endif %}
 
