@@ -187,25 +187,31 @@ export class PollController {
   }
 
   @Get(':code/question/:qNo')
-  @Render('play_poll')
   playPollQuestion(
     @Cookies('name') name: string,
     @Cookies('uuid') uuid: string,
     @Param('code') code: string,
     @Param('qNo') qNo: string,
+    @Res() res: Response,
   ) {
     const poll = this.pollService.findOne(code);
     const user = userFrom(name, uuid);
+    if (!poll) {
+      // poll does not exist
+      return res.status(HttpStatus.NOT_FOUND).render('not_found', {
+        user: user,
+      });
+    }
     const userAnswer = getUserAnswer(
       poll.questions[parseInt(qNo) - 1].answerOptions,
       user,
     );
-    return {
+    return res.status(HttpStatus.OK).render('play_poll', {
       user: user,
       poll: poll,
       userAnswer: userAnswer,
       selectedQuestion: qNo,
-    };
+    });
   }
 
   @Post(':code/question/:qNo')

@@ -118,7 +118,7 @@ export class PollService {
     return this.polls;
   }
 
-  findOne(code: string): Poll {
+  findOne(code: string): Poll | undefined {
     return this.polls.find((poll) => poll.code === code);
   }
 
